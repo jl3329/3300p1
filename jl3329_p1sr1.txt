@@ -1,0 +1,6 @@
+Project 1 Status Report 1
+This week, I met up with my group to complete our contract and 
+to decide what we would do for our project.
+We decided to use a dataset for 911 calls in Seattle, plotting points
+on a map of Seattle corresponding to the location at which the call was made.
+We decided to use different colored markers to determine what kind of call was made.
