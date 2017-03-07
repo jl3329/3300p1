@@ -1,0 +1,133 @@
+<html>
+<meta charset="utf-8">
+<head>
+	<title>P1</title>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="http://d3js.org/topojson.v2.min.js"></script>
+</head>
+<body style="margin:0">
+<svg id="day" height="600" width="600"></svg>
+<!-- <svg id="night" height="600" width="600"></svg> -->
+
+<script>
+	var daySvg = d3.select("#day");
+	var nightSvg = d3.select("#night");
+
+	var projection = d3.geoMercator();
+	var pathGenerator = d3.geoPath().projection(projection);
+
+	var district1;
+	var district2;
+	var district3;
+	var district4;
+	var district5;
+	var district6;
+	var district7;
+
+	d3.json("city-council-districts.topojson", function (error, data) {
+		var districts = topojson.feature(data, data.objects.geo);
+
+		projection.fitExtent([[0,0], [daySvg.attr("width"), daySvg.attr("height")]], districts);
+		var paths = daySvg.selectAll("path.district").data(districts.features);
+		paths.enter()
+		.append("path")
+		.merge(paths)
+		.attr("style", "stroke:black")
+		.attr("d", function (district) {
+			return pathGenerator(district);
+		});
+
+		district1 = document.elementFromPoint(200, 400);
+		district2 = document.elementFromPoint(400, 400);
+		district3 = document.elementFromPoint(400, 300);
+		district4 = document.elementFromPoint(400, 200);
+		district5 = document.elementFromPoint(400, 50);
+		district6 = document.elementFromPoint(200, 100);
+		district7 = document.elementFromPoint(200, 200);
+
+		showPoints();
+	});
+
+	// given a longitude and latitude in the form of an array, 
+	// return city council district in which the point resides
+	function getDistrict (coordinates) {
+		var x = projection(coordinates)[0];
+		var y = projection(coordinates)[1];
+
+		var district = document.elementFromPoint(x, y);
+		if (district === district1) {
+			return "district1";
+		}
+		else if (district === district2) {
+			return "district2";
+		}
+		else if (district === district3) {
+			return "district3";
+		}
+		else if (district === district4) {
+			return "district4";
+		}
+		else if (district === district5) {
+			return "district5";
+		}
+		else if (district === district6) {
+			return "district6";
+		}
+		else if (district === district7) {
+			return "district7";
+		}
+		else {
+			return null;
+		}
+	}
+
+	function showPoints() {
+		d3.csv("processed_911.csv", 
+		function row (d) {
+			return {
+				longitude: d.Longitude,
+				latitude: d.Latitude
+			};
+		},
+		function cb (err, data) {
+			var count = {
+				district1: 0,
+				district2: 0,
+				district3: 0,
+				district4: 0,
+				district5: 0,
+				district6: 0,
+				district7: 0
+			};
+
+			data.forEach(function (row) {
+				var long = row.longitude;
+				var lat = row.latitude;
+
+				var coordinates = [long, lat];
+				var x = projection(coordinates)[0];
+				var y = projection(coordinates)[1];
+
+				var district = getDistrict(coordinates);
+
+				if (district === null) return;
+				count[district] += 1;
+			});
+
+			var color = d3.scaleLinear()
+			.domain([0, 23302])
+			.range(["white", "red"])
+
+			district1.style.fill = color(count.district1);
+			district2.style.fill = color(count.district2);
+			district3.style.fill = color(count.district3);
+			district4.style.fill = color(count.district4);
+			district5.style.fill = color(count.district5);
+			district6.style.fill = color(count.district6);
+			district7.style.fill = color(count.district7);
+		});
+	}
+
+</script>
+</body>
+</html>
